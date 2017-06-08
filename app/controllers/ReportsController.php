@@ -1242,7 +1242,13 @@ class ReportsController extends \BaseController {
 
     $department = Department::whereNull('organization_id')->orWhere('organization_id',Confide::user()->organization_id)->where('department_name','Management')->first();
 
-    $type = Employee::where('organization_id',Confide::user()->organization_id)->where('department_id',$department->id)->where('personal_file_number',Confide::user()->username)->count();
+    $jgroup = Jobgroup::where(function($query){
+                            $query->whereNull('organization_id')
+                                  ->orWhere('organization_id',Confide::user()->organization_id);
+                            })->where('job_group_name','Management')
+                              ->first();
+
+    $type = Employee::where('organization_id',Confide::user()->organization_id)->where('job_group_id',$jgroup->id)->where('personal_file_number',Confide::user()->username)->count();
     return View::make('pdf.payslipSelect', compact('employees','branches','departments','type'));
   }
 
@@ -1299,7 +1305,21 @@ class ReportsController extends \BaseController {
       if(Input::get('format') == "excel"){
         if(Input::get('employeeid') == 'All'){
         $period = Input::get("period");
+        $type = Input::get("type");
+        $jgroup = Jobgroup::where(function($query){
+                            $query->whereNull('organization_id')
+                                  ->orWhere('organization_id',Confide::user()->organization_id);
+                            })->where('job_group_name','Management')
+                              ->first();
+
         $employees = Employee::where('organization_id',Confide::User()->organization_id)->get();
+
+        if($type == 1 || Confide::user()->user_type == 'admin'){
+        $employees = Employee::where('organization_id',Confide::User()->organization_id)->where('job_group_id',$jgroup->id)->get();
+        }else{
+        $employees = Employee::where('organization_id',Confide::User()->organization_id)->where('job_group_id','!=',$jgroup->id)->get();
+        }
+
         foreach ($employees as $employee) {
   
 
@@ -2213,6 +2233,28 @@ class ReportsController extends \BaseController {
 
     $organization = Organization::find(Confide::user()->organization_id);
 
+    $type = Input::get("type");
+    $jgroup = Jobgroup::where(function($query){
+                            $query->whereNull('organization_id')
+                                  ->orWhere('organization_id',Confide::user()->organization_id);
+                            })->where('job_group_name','Management')
+                              ->first();
+
+      if($type == 1 || Confide::user()->user_type == 'admin'){
+         $empall = DB::table('transact')
+            ->join('employee', 'transact.employee_id', '=', 'employee.personal_file_number')
+            ->where('financial_month_year' ,'=', Input::get('period'))
+            ->where('employee.organization_id',Confide::user()->organization_id)
+            ->get(); 
+      }else{
+        $empall = DB::table('transact')
+            ->join('employee', 'transact.employee_id', '=', 'employee.personal_file_number')
+            ->where('financial_month_year' ,'=', Input::get('period'))
+            ->where('job_group_id' ,'!=', $jgroup->id)
+            ->where('employee.organization_id',Confide::user()->organization_id)
+            ->get(); 
+        }
+
     $pdf = PDF::loadView('pdf.monthlySlip', compact('empall','select','period','currency', 'organization'))->setPaper('a5')->setOrientation('potrait');
   
     return $pdf->stream('Payslips.pdf');
@@ -2328,7 +2370,13 @@ class ReportsController extends \BaseController {
 
     $department = Department::whereNull('organization_id')->orWhere('organization_id',Confide::user()->organization_id)->where('department_name','Management')->first();
 
-    $type = Employee::where('organization_id',Confide::user()->organization_id)->where('department_id',$department->id)->where('personal_file_number',Confide::user()->username)->count();
+    $jgroup = Jobgroup::where(function($query){
+                            $query->whereNull('organization_id')
+                                  ->orWhere('organization_id',Confide::user()->organization_id);
+                            })->where('job_group_name','Management')
+                              ->first();
+
+    $type = Employee::where('organization_id',Confide::user()->organization_id)->where('job_group_id',$jgroup->id)->where('personal_file_number',Confide::user()->username)->count();
 
     return View::make('pdf.allowanceSelect', compact('allws','type'));
   }
@@ -2931,7 +2979,13 @@ class ReportsController extends \BaseController {
 
     $department = Department::whereNull('organization_id')->orWhere('organization_id',Confide::user()->organization_id)->where('department_name','Management')->first();
 
-    $type = Employee::where('organization_id',Confide::user()->organization_id)->where('department_id',$department->id)->where('personal_file_number',Confide::user()->username)->count();
+    $jgroup = Jobgroup::where(function($query){
+                            $query->whereNull('organization_id')
+                                  ->orWhere('organization_id',Confide::user()->organization_id);
+                            })->where('job_group_name','Management')
+                              ->first();
+
+    $type = Employee::where('organization_id',Confide::user()->organization_id)->where('job_group_id',$jgroup->id)->where('personal_file_number',Confide::user()->username)->count();
 
     return View::make('pdf.earningSelect', compact('earnings','type'));
   }
@@ -3357,7 +3411,13 @@ class ReportsController extends \BaseController {
   {
     $department = Department::whereNull('organization_id')->orWhere('organization_id',Confide::user()->organization_id)->where('department_name','Management')->first();
 
-    $type = Employee::where('organization_id',Confide::user()->organization_id)->where('department_id',$department->id)->where('personal_file_number',Confide::user()->username)->count();
+    $jgroup = Jobgroup::where(function($query){
+                            $query->whereNull('organization_id')
+                                  ->orWhere('organization_id',Confide::user()->organization_id);
+                            })->where('job_group_name','Management')
+                              ->first();
+
+    $type = Employee::where('organization_id',Confide::user()->organization_id)->where('job_group_id',$jgroup->id)->where('personal_file_number',Confide::user()->username)->count();
     return View::make('pdf.overtimeSelect',compact('type'));
   }
 
@@ -3790,7 +3850,13 @@ class ReportsController extends \BaseController {
 
     $department = Department::whereNull('organization_id')->orWhere('organization_id',Confide::user()->organization_id)->where('department_name','Management')->first();
 
-    $type = Employee::where('organization_id',Confide::user()->organization_id)->where('department_id',$department->id)->where('personal_file_number',Confide::user()->username)->count();
+    $jgroup = Jobgroup::where(function($query){
+                            $query->whereNull('organization_id')
+                                  ->orWhere('organization_id',Confide::user()->organization_id);
+                            })->where('job_group_name','Management')
+                              ->first();
+
+    $type = Employee::where('organization_id',Confide::user()->organization_id)->where('job_group_id',$jgroup->id)->where('personal_file_number',Confide::user()->username)->count();
 
     return View::make('pdf.reliefSelect', compact('reliefs','type'));
   }
@@ -4223,7 +4289,13 @@ class ReportsController extends \BaseController {
 
     $department = Department::whereNull('organization_id')->orWhere('organization_id',Confide::user()->organization_id)->where('department_name','Management')->first();
 
-    $type = Employee::where('organization_id',Confide::user()->organization_id)->where('department_id',$department->id)->where('personal_file_number',Confide::user()->username)->count();
+    $jgroup = Jobgroup::where(function($query){
+                            $query->whereNull('organization_id')
+                                  ->orWhere('organization_id',Confide::user()->organization_id);
+                            })->where('job_group_name','Management')
+                              ->first();
+
+    $type = Employee::where('organization_id',Confide::user()->organization_id)->where('job_group_id',$jgroup->id)->where('personal_file_number',Confide::user()->username)->count();
 
     return View::make('pdf.deductionSelect', compact('deds','type'));
   }
@@ -4656,7 +4728,13 @@ class ReportsController extends \BaseController {
 
     $department = Department::whereNull('organization_id')->orWhere('organization_id',Confide::user()->organization_id)->where('department_name','Management')->first();
 
-    $type = Employee::where('organization_id',Confide::user()->organization_id)->where('department_id',$department->id)->where('personal_file_number',Confide::user()->username)->count();
+    $jgroup = Jobgroup::where(function($query){
+                            $query->whereNull('organization_id')
+                                  ->orWhere('organization_id',Confide::user()->organization_id);
+                            })->where('job_group_name','Management')
+                              ->first();
+
+    $type = Employee::where('organization_id',Confide::user()->organization_id)->where('job_group_id',$jgroup->id)->where('personal_file_number',Confide::user()->username)->count();
 
     return View::make('pdf.nontaxableSelect', compact('nontaxables','type'));
   }
@@ -5891,7 +5969,13 @@ class ReportsController extends \BaseController {
     $depts = Department::whereNull('organization_id')->orWhere('organization_id',Confide::user()->organization_id)->get();
     $department = Department::whereNull('organization_id')->orWhere('organization_id',Confide::user()->organization_id)->where('department_name','Management')->first();
 
-    $type = Employee::where('organization_id',Confide::user()->organization_id)->where('department_id',$department->id)->where('personal_file_number',Confide::user()->username)->count();
+    $jgroup = Jobgroup::where(function($query){
+                            $query->whereNull('organization_id')
+                                  ->orWhere('organization_id',Confide::user()->organization_id);
+                            })->where('job_group_name','Management')
+                              ->first();
+
+    $type = Employee::where('organization_id',Confide::user()->organization_id)->where('job_group_id',$jgroup->id)->where('personal_file_number',Confide::user()->username)->count();
     return View::make('pdf.remittanceSelect',compact('branches','depts','type'));
   }
 
@@ -6689,7 +6773,13 @@ class ReportsController extends \BaseController {
     $depts = Department::whereNull('organization_id')->orWhere('organization_id',Confide::user()->organization_id)->get();
     $department = Department::whereNull('organization_id')->orWhere('organization_id',Confide::user()->organization_id)->where('department_name','Management')->first();
 
-    $type = Employee::where('organization_id',Confide::user()->organization_id)->where('department_id',$department->id)->where('personal_file_number',Confide::user()->username)->count();
+    $jgroup = Jobgroup::where(function($query){
+                            $query->whereNull('organization_id')
+                                  ->orWhere('organization_id',Confide::user()->organization_id);
+                            })->where('job_group_name','Management')
+                              ->first();
+
+    $type = Employee::where('organization_id',Confide::user()->organization_id)->where('job_group_id',$jgroup->id)->where('personal_file_number',Confide::user()->username)->count();
     return View::make('pdf.summarySelect',compact('branches','depts','type'));
   }
 

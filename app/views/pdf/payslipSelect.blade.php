@@ -4,7 +4,6 @@
 
 <script type="text/javascript">
 $(document).ready(function() {
-
     $('#branchid').change(function(){
         $.get("{{ url('api/branchemployee')}}", 
         { option: $(this).val(),
@@ -20,7 +19,6 @@ $(document).ready(function() {
             });
         });
     });
-
     $('#departmentid').change(function(){
         $.get("{{ url('api/deptemployee')}}", 
         { option: $(this).val(),
@@ -35,27 +33,26 @@ $(document).ready(function() {
             });
         });
     });
-
 });
 </script>
 
 @section('content')
 
 <div class="row">
-	<div class="col-lg-12">
+    <div class="col-lg-12">
   <h3>Select Period</h3>
 
 <hr>
-</div>	
+</div>  
 </div>
 
 
 <div class="row">
-	<div class="col-lg-5">
+    <div class="col-lg-5">
 
     
-		
-		 @if ($errors->has())
+        
+         @if ($errors->has())
         <div class="alert alert-danger">
             @foreach ($errors->all() as $error)
                 {{ $error }}<br>        
@@ -63,11 +60,11 @@ $(document).ready(function() {
         </div>
         @endif
 
-		 <form target="_blank" method="POST" action="{{URL::to('payrollReports/payslip')}}" accept-charset="UTF-8">
+         <form target="_blank" method="POST" action="{{URL::to('payrollReports/payslip')}}" accept-charset="UTF-8">
    
     <fieldset>
 
-     <input required class="form-control" readonly="readonly" placeholder="" type="hidden" name="period" id="period" value="{{$type}}">
+     <input required class="form-control" readonly="readonly" placeholder="" type="hidden" name="type" id="type" value="{{$type}}">
 
         <div class="form-group">
                         <label for="username">Period <span style="color:red">*</span></label>
@@ -141,7 +138,7 @@ $(document).ready(function() {
 
     </fieldset>
 </form>
-		
+        
 
   </div>
 
